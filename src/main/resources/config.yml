@@ -1,0 +1,12 @@
+Bot:
+  # 希望被用作直播机器人的ID
+  Name: Steve
+Setting:
+  # 在单个玩家身上的聚焦时间（单位：秒）
+  FocusTime: 300
+  # 切换方案 ORDER: 顺序 RANDOM: 随机
+  ChangingPattern: ORDER
+  # 玩家能否设置自己不被聚焦
+  CanBeMoved: true
+  # 是否在聊天栏公告自己的状态
+  IsNagging: true
