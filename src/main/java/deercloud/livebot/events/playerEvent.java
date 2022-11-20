@@ -7,12 +7,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
+import java.util.logging.Logger;
+
 public class playerEvent implements Listener {
 
     public playerEvent(){
         LiveBot m_plugin = LiveBot.getInstance();
         m_config_manager = m_plugin.getConfigManager();
         m_work_func = m_plugin.getWorkFunc();
+        m_logger = m_plugin.getLogger();
     }
 
     @EventHandler
@@ -20,7 +23,7 @@ public class playerEvent implements Listener {
         Player player = event.getPlayer();
 
         if (player.getName().equals(m_config_manager.getBotName())) {
-            System.out.println("配置的直播机器人已经上线，开始执行序列。");
+            m_logger.info("检测到机器人上线。");
             m_work_func.botOnline(player);
             player.setGameMode(org.bukkit.GameMode.SPECTATOR);
         }else{
@@ -34,16 +37,27 @@ public class playerEvent implements Listener {
         Player player = event.getPlayer();
 
         if (player.getName().equals(m_config_manager.getBotName())) {
-            System.out.println("配置的直播机器人已经下线，停止执行序列。");
+            m_logger.info("检测到机器人下线。");
             m_work_func.botOffline();
         }else{
             m_work_func.removePlayer(player);
         }
+    }
 
+    // 玩家死亡
+    @EventHandler
+    public void onDeath(org.bukkit.event.entity.PlayerDeathEvent event) {
+        Player player = event.getEntity();
+        if (player.getName().equals(m_work_func.getCurrentPlayerName())) {
+            m_work_func.restart();
+            m_logger.info("检测到玩家死亡，更换视角。");
+        }
     }
 
     private final ConfigManager m_config_manager;
     private final WorkFunc m_work_func;
+
+    private final Logger m_logger;
 
 
 }

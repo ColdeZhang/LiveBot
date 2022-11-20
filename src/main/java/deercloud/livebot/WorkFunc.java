@@ -35,8 +35,14 @@ public class WorkFunc {
                     m_index = 0;
                 }
                 Player player = m_players.get(m_index);
+                if (player.isDead()) {
+                    m_logger.info("玩家" + player.getName() + "已经死亡，本次切换跳过。");
+                    m_index++;
+                    return;
+                }
                 m_logger.info("切换到玩家：" + player.getName());
                 m_bot.setSpectatorTarget(Bukkit.getPlayer(player.getName()));
+                m_current_player_name = player.getName();
                 player.sendMessage(ChatColor.GOLD + "你被直播机器人选中了，如果不想被直播可以使用/livebot away 在本次登录不再被选中。被直播有助于给服务器增加人气哦～");
                 m_index++;
             } else if (m_config_manager.getChangePattern().equals("RANDOM")) {
@@ -44,6 +50,7 @@ public class WorkFunc {
                 Player player = m_players.get(random_index);
                 m_logger.info("切换到玩家：" + player.getName());
                 m_bot.setSpectatorTarget(Bukkit.getPlayer(player.getName()));
+                m_current_player_name = player.getName();
                 player.sendMessage(ChatColor.GOLD + "你被直播机器人选中了，如果不想被直播可以使用/livebot away 在本次登录不再被选中。被直播有助于给服务器增加人气哦～");
             }
         }
@@ -107,8 +114,12 @@ public class WorkFunc {
     private final LiveBot m_plugin;
     private final ConfigManager m_config_manager;
     private final Logger m_logger;
-
+    private String m_current_player_name = "";
     private boolean is_running = false;
+
+    public String getCurrentPlayerName() {
+        return m_current_player_name;
+    }
 
     public void botOnline(Player bot) {
         bot.setGameMode(GameMode.SPECTATOR);
