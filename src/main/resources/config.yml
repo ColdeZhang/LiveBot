@@ -10,3 +10,5 @@ Setting:
   CanBeMoved: true
   # 是否在聊天栏公告自己的状态
   IsNagging: true
+  # 是否跳过挂机玩家
+  SkipAFK: true

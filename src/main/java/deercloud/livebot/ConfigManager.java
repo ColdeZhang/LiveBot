@@ -18,7 +18,12 @@ public class ConfigManager {
         m_plugin.reloadConfig();
         m_config_file = m_plugin.getConfig();
         m_bot_name = m_config_file.getString("Bot.Name", "Steve");
-        m_focus_time = m_config_file.getInt("Setting.FocusTime", 5);
+        m_focus_time = m_config_file.getInt("Setting.FocusTime", 300);
+        if (m_focus_time < 10) {
+            m_focus_time = 10;
+            setFocusTime(m_focus_time);
+            m_logger.warning("切换时间不能小于10秒，已经自动调整为10秒。");
+        }
         m_change_pattern = m_config_file.getString("Setting.ChangingPattern", "ORDER");
         if (!m_change_pattern.equals("ORDER") && !m_change_pattern.equals("RANDOM")) {
             m_change_pattern = "ORDER";
@@ -27,6 +32,7 @@ public class ConfigManager {
         }
         m_can_be_moved = m_config_file.getBoolean("Setting.CanBeMoved", true);
         m_is_nagging = m_config_file.getBoolean("Setting.IsNagging", true);
+        m_skip_afk = m_config_file.getBoolean("Setting.SkipAFK", true);
         m_logger.info("配置文件当前内容");
         m_logger.info("   -  直播机器人名称   ：" + m_bot_name);
         m_logger.info("   -  切换频率        ：" + m_focus_time + "秒");
@@ -43,6 +49,7 @@ public class ConfigManager {
     private String m_change_pattern;
     private boolean m_can_be_moved;
     private boolean m_is_nagging;
+    private boolean m_skip_afk;
 
 
 
@@ -93,6 +100,16 @@ public class ConfigManager {
     public void setIsNagging(boolean is_nagging) {
         m_is_nagging = is_nagging;
         m_config_file.set("Setting.IsNagging", is_nagging);
+        m_plugin.saveConfig();
+    }
+
+    public boolean getSkipAFK() {
+        return m_skip_afk;
+    }
+
+    public void setSkipAFK(boolean skip_afk) {
+        m_skip_afk = skip_afk;
+        m_config_file.set("Setting.SkipAFK", skip_afk);
         m_plugin.saveConfig();
     }
 

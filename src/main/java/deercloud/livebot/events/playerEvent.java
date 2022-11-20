@@ -25,7 +25,6 @@ public class playerEvent implements Listener {
         if (player.getName().equals(m_config_manager.getBotName())) {
             m_logger.info("检测到机器人上线。");
             m_work_func.botOnline(player);
-            player.setGameMode(org.bukkit.GameMode.SPECTATOR);
         }else{
             m_work_func.addPlayer(player);
         }
@@ -50,7 +49,7 @@ public class playerEvent implements Listener {
         Player player = event.getEntity();
         if (player.getName().equals(m_work_func.getCurrentPlayerName())) {
             m_work_func.restart();
-            m_logger.info("检测到玩家死亡，更换视角。");
+            m_logger.info("检测到玩家" + m_work_func.getCurrentPlayerName() + "死亡，更换视角。");
         }
     }
 

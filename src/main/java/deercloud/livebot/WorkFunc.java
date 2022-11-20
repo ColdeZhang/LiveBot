@@ -3,10 +3,13 @@ package deercloud.livebot;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class WorkFunc {
@@ -28,35 +31,68 @@ public class WorkFunc {
                 return;
             }
 
-            m_logger.info("切换玩家视角。");
+            m_logger.info("准备切换玩家视角。");
 
-            if (m_config_manager.getChangePattern().equals("ORDER")) {
-                if (m_index >= m_players.size()) {
-                    m_index = 0;
-                }
-                Player player = m_players.get(m_index);
-                if (player.isDead()) {
-                    m_logger.info("玩家" + player.getName() + "已经死亡，本次切换跳过。");
-                    m_index++;
-                    return;
-                }
-                m_logger.info("切换到玩家：" + player.getName());
-                m_bot.setSpectatorTarget(Bukkit.getPlayer(player.getName()));
-                m_current_player_name = player.getName();
-                player.sendMessage(ChatColor.GOLD + "你被直播机器人选中了，如果不想被直播可以使用/livebot away 在本次登录不再被选中。被直播有助于给服务器增加人气哦～");
-                m_index++;
-            } else if (m_config_manager.getChangePattern().equals("RANDOM")) {
-                int random_index = (int) (Math.random() * m_players.size());
-                Player player = m_players.get(random_index);
-                m_logger.info("切换到玩家：" + player.getName());
-                m_bot.setSpectatorTarget(Bukkit.getPlayer(player.getName()));
-                m_current_player_name = player.getName();
-                player.sendMessage(ChatColor.GOLD + "你被直播机器人选中了，如果不想被直播可以使用/livebot away 在本次登录不再被选中。被直播有助于给服务器增加人气哦～");
+            Player player = getNext();
+            if (player == null) {
+                m_logger.info("没有玩家，本次切换跳过。");
+                player = getNext();
             }
+            if (player.isDead()) {
+                m_logger.info("玩家" + player.getName() + "已经死亡，跳过此玩家。");
+                player = getNext();
+            }
+            if (isAFK(player) && m_config_manager.getSkipAFK()) {
+                m_logger.info("玩家" + player.getName() + "可能在挂机，跳过此玩家。");
+                player = getNext();
+            }
+            m_logger.info("切换到玩家：" + player.getName());
+            m_bot.setSpectatorTarget(Bukkit.getPlayer(player.getName()));
+            m_current_player_name = player.getName();
+            player.sendMessage(ChatColor.GOLD + "你被直播机器人选中了，如果不想被直播可以使用/livebot away 在本次登录不再被选中。被直播有助于给服务器增加人气哦～");
+
         }
     };
 
 
+    private boolean isAFK(Player player) {
+        Location location_1 =  player.getLocation();
+        if (!m_players.containsKey(player)){
+            m_logger.warning("玩家" + player.getName() + "不在玩家列表中，无法判断是否在挂机。");
+            return true;
+        }
+        Location location_2 = m_players.put(player, player.getLocation());
+        if (location_2 == null) {
+            m_logger.warning("玩家" + player.getName() + "上一次位置为空，无法判断是否在挂机。");
+            return true;
+        }
+        return location_1.getX() == location_2.getX() && location_1.getY() == location_2.getY() && location_1.getZ() == location_2.getZ();
+    }
+
+    private Player getNext() {
+        if (m_config_manager.getChangePattern().equals("ORDER")) {
+            m_index++;
+            if (m_index >= m_players.size()) {
+                m_index = 0;
+            }
+            return get_m_players(m_index);
+        } else if (m_config_manager.getChangePattern().equals("RANDOM")) {
+            int random_index = (int) (Math.random() * m_players.size());
+            return get_m_players(random_index);
+        }
+        return null;
+    }
+
+    private Player get_m_players(int index) {
+        int i = 0;
+        for (Map.Entry<Player, Location> entry : m_players.entrySet()) {
+            if (i == index) {
+                return entry.getKey();
+            }
+            i++;
+        }
+        return null;
+    }
 
     public void start(long delay,long time) {
         if (!is_running) {
@@ -72,16 +108,21 @@ public class WorkFunc {
         m_logger.info("重新寻找直播机器人。");
         botOffline();
         m_players.clear();
-        m_players.addAll(Bukkit.getOnlinePlayers());
-        for (Player player : m_players) {
-            if (player.getName().equals(m_config_manager.getBotName())) {
-                m_players.remove(player);
-                botOnline(player);
-                m_logger.info("找到直播机器人：" + player.getName());
-                return;
-            }
+        ArrayList<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
+        for (Player player : players) {
+            m_players.put(player, player.getLocation());
         }
-        m_logger.warning("未找到直播机器人，序列不会启动。");
+        // 获取对应名字的玩家
+        Player bot = Bukkit.getPlayer(m_config_manager.getBotName());
+        if (bot == null) {
+            m_logger.warning("未找到直播机器人，序列不会启动。");
+            return;
+        }
+        if (m_players.containsKey(Bukkit.getPlayer(m_config_manager.getBotName()))) {
+            m_players.remove(bot);
+            botOnline(bot);
+            m_logger.info("找到直播机器人：" + bot.getName());
+        }
     }
 
     public void restart() {
@@ -107,7 +148,8 @@ public class WorkFunc {
     }
 
     private Player m_bot;
-    private final ArrayList<Player> m_players = new ArrayList<>();
+//    private final ArrayList<Player> m_players = new ArrayList<>();
+    private final Map<Player, Location> m_players = new HashMap<>();
     private boolean m_is_bot_online = false;
     private int m_index = 0;
     private task m_task = null;
@@ -135,10 +177,16 @@ public class WorkFunc {
     }
 
     public void addPlayer(Player player) {
-        m_players.add(player);
+        if (m_players.containsKey(player)) {
+            return;
+        }
+        m_players.put(player, player.getLocation());
     }
 
     public void removePlayer(Player player) {
+        if (!m_players.containsKey(player)) {
+            return;
+        }
         m_players.remove(player);
     }
 }
