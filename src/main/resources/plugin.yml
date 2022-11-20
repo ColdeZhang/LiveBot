@@ -1,10 +1,10 @@
 name: LiveBot
 version: '${project.version}'
 main: deercloud.livebot.LiveBot
-api-version: 1.19
+api-version: 1.13
 prefix: LiveBot
 load: STARTUP
-authors: [ Luming ]
+authors: [ Luming, DeerCloud, ColdeZhang ]
 description: 将机器人玩家切换为旁观模式并自动跟随其他玩家。
 website: https://blog.deercloud.site
 commands:

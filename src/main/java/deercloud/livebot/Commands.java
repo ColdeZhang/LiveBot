@@ -6,13 +6,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 
 public class Commands implements TabExecutor {
 
     @Override
-    @ParametersAreNonnullByDefault
     public boolean onCommand(org.bukkit.command.CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
         if (Objects.equals(args[0], "reload")) {
             if (sender instanceof Player) {
@@ -170,7 +168,6 @@ public class Commands implements TabExecutor {
     }
 
     @Override
-    @ParametersAreNonnullByDefault
     public List<String> onTabComplete(org.bukkit.command.CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
         if (args.length == 1) {
             return Arrays.asList("reload", "setBot", "away", "setTime", "setPattern", "setCanBeMoved", "stop", "start", "skipAFK");
