@@ -34,6 +34,8 @@
 
 `/livebot setCanMoved <true | false>` 玩家是否可以不被跟随。
 
+`/livebot setSkipAFK <true | false>` 是否跳过挂机玩家。
+
 `/livebot start` 开始自动跟随（默认都是开启的）。
     
 `/livebot stop` 停止自动跟随。
