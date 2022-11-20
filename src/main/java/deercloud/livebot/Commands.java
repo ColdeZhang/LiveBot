@@ -46,9 +46,13 @@ public class Commands implements TabExecutor {
         } else if (Objects.equals(args[0], "away")) {
             if (sender instanceof org.bukkit.entity.Player) {
                 org.bukkit.entity.Player player = (org.bukkit.entity.Player) sender;
-                m_work_func.removePlayer(player);
-                player.sendMessage("机器人已经离开了你，本次登录不会再被选中。");
-                m_work_func.restart();
+                if (m_config_manager.getCanBeMoved()) {
+                    m_work_func.removePlayer(player);
+                    player.sendMessage(ChatColor.GREEN + "机器人已经离开了你，本次登录不会再被选中。");
+                    m_work_func.restart();
+                } else {
+                    player.sendMessage(ChatColor.YELLOW + "服主设置了强制跟随，你无法摆脱机器人，请联系服主。");
+                }
             } else {
                 sender.sendMessage("这个命令需要由玩家执行。");
             }
@@ -86,6 +90,42 @@ public class Commands implements TabExecutor {
                 sender.sendMessage("切换方式设置为：" + args[1]);
                 m_work_func.restart();
             }
+        } else if (Objects.equals(args[0], "setCanBeMoved")) {
+            if (Objects.equals(args[1], "true")) {
+                m_config_manager.setCanBeMoved(true);
+                sender.sendMessage(ChatColor.GREEN + "允许玩家不被跟随。");
+            } else if (Objects.equals(args[1], "false")) {
+                m_config_manager.setCanBeMoved(false);
+                sender.sendMessage(ChatColor.GREEN + "玩家现在无法摆脱机器人。");
+            } else {
+                sender.sendMessage(ChatColor.RED + "参数只能为true或false。");
+            }
+        } else if (Objects.equals(args[0], "stop")) {
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                if (player.isOp()) {
+                    player.sendMessage(ChatColor.GREEN + "机器人已停止。");
+                    m_work_func.stop();
+                } else {
+                    player.sendMessage(ChatColor.RED + "你没有权限执行此命令。");
+                }
+            } else {
+                sender.sendMessage(ChatColor.GREEN + "机器人已停止。");
+                m_work_func.stop();
+            }
+        } else if (Objects.equals(args[0], "start")) {
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                if (player.isOp()) {
+                    player.sendMessage(ChatColor.GREEN + "机器人已启动。");
+                    m_work_func.start(0, m_config_manager.getFocusTime());
+                } else {
+                    player.sendMessage(ChatColor.RED + "你没有权限执行此命令。");
+                }
+            } else {
+                sender.sendMessage("机器人已启动。");
+                m_work_func.start(0, m_config_manager.getFocusTime());
+            }
         }
         return true;
     }
@@ -94,7 +134,7 @@ public class Commands implements TabExecutor {
     @ParametersAreNonnullByDefault
     public List<String> onTabComplete(org.bukkit.command.CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("reload", "setBot", "away", "setTime", "setPattern");
+            return Arrays.asList("reload", "setBot", "away", "setTime", "setPattern", "setCanBeMoved");
         } else if (args.length == 2) {
             if (Objects.equals(args[0], "setBot")) {
                 ArrayList<Player> playerList = new ArrayList<>(Bukkit.getOnlinePlayers());
@@ -108,8 +148,9 @@ public class Commands implements TabExecutor {
                 return Collections.singletonList("请输入时间(单位秒)");
             } else if (Objects.equals(args[0], "setPattern")) {
                 return Arrays.asList("ORDER", "RANDOM");
-            }
-            else {
+            } else if (Objects.equals(args[0], "setCanBeMoved")) {
+                return Arrays.asList("true", "false");
+            } else {
                 return Collections.emptyList();
             }
         } else {

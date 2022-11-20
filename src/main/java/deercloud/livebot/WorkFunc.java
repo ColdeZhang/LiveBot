@@ -1,6 +1,7 @@
 package deercloud.livebot;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -36,14 +37,14 @@ public class WorkFunc {
                 Player player = m_players.get(m_index);
                 m_logger.info("切换到玩家：" + player.getName());
                 m_bot.setSpectatorTarget(Bukkit.getPlayer(player.getName()));
-                player.sendMessage("你被直播机器人选中了，如果不想被直播可以使用/livebot away 在本次登录不再被选中。");
+                player.sendMessage(ChatColor.GOLD + "你被直播机器人选中了，如果不想被直播可以使用/livebot away 在本次登录不再被选中。被直播有助于给服务器增加人气哦～");
                 m_index++;
             } else if (m_config_manager.getChangePattern().equals("RANDOM")) {
                 int random_index = (int) (Math.random() * m_players.size());
                 Player player = m_players.get(random_index);
                 m_logger.info("切换到玩家：" + player.getName());
                 m_bot.setSpectatorTarget(Bukkit.getPlayer(player.getName()));
-                player.sendMessage("你被直播机器人选中了，如果不想被直播可以使用/livebot away 在本次登录不再被选中。");
+                player.sendMessage(ChatColor.GOLD + "你被直播机器人选中了，如果不想被直播可以使用/livebot away 在本次登录不再被选中。被直播有助于给服务器增加人气哦～");
             }
         }
     };
