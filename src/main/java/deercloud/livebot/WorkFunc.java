@@ -20,7 +20,7 @@ public class WorkFunc {
         m_logger = m_plugin.getLogger();
     }
 
-    private class task extends BukkitRunnable {
+    private class mainTask extends BukkitRunnable {
         @Override
         public void run() {
             if (!is_running) {
@@ -34,25 +34,43 @@ public class WorkFunc {
             m_logger.info("准备切换玩家视角。");
 
             Player player = getNext();
-            if (player == null) {
+            int total_players = m_players.size();
+            if (player == null || total_players == 0) {
                 m_logger.info("没有玩家，本次切换跳过。");
-                player = getNext();
+                return;
             }
-            if (player.isDead()) {
-                m_logger.info("玩家" + player.getName() + "已经死亡，跳过此玩家。");
-                player = getNext();
-            }
-            if (isAFK(player) && m_config_manager.getSkipAFK()) {
-                m_logger.info("玩家" + player.getName() + "可能在挂机，跳过此玩家。");
-                player = getNext();
+            int counter = 0;
+            while (counter < total_players) {
+                counter++;
+                if (player.isDead()) {
+                    m_logger.info("玩家" + player.getName() + "已经死亡，跳过此玩家。");
+                    player = getNext();
+                    continue;
+                }
+                if (isAFK(player) && m_config_manager.getSkipAFK()) {
+                    m_logger.info("玩家" + player.getName() + "可能在挂机，跳过此玩家。");
+                    player = getNext();
+                    continue;
+                }
+                break;
             }
             m_logger.info("切换到玩家：" + player.getName());
-            m_bot.setSpectatorTarget(Bukkit.getPlayer(player.getName()));
+            m_bot.setGameMode(GameMode.SPECTATOR);
+            m_bot.setSpectatorTarget(player);
             m_current_player_name = player.getName();
             player.sendMessage(ChatColor.GOLD + "你被直播机器人选中了，如果不想被直播可以使用/livebot away 在本次登录不再被选中。被直播有助于给服务器增加人气哦～");
-
         }
-    };
+    }
+
+    private class updateLocationTask extends BukkitRunnable {
+        @Override
+        public void run() {
+            for (Map.Entry<Player, Location> entry : m_players.entrySet()) {
+                Player player = entry.getKey();
+                m_players.put(player, player.getLocation());
+            }
+        }
+    }
 
 
     private boolean isAFK(Player player) {
@@ -61,7 +79,7 @@ public class WorkFunc {
             m_logger.warning("玩家" + player.getName() + "不在玩家列表中，无法判断是否在挂机。");
             return true;
         }
-        Location location_2 = m_players.put(player, player.getLocation());
+        Location location_2 = m_players.get(player);
         if (location_2 == null) {
             m_logger.warning("玩家" + player.getName() + "上一次位置为空，无法判断是否在挂机。");
             return true;
@@ -75,15 +93,15 @@ public class WorkFunc {
             if (m_index >= m_players.size()) {
                 m_index = 0;
             }
-            return get_m_players(m_index);
+            return get_m_player(m_index);
         } else if (m_config_manager.getChangePattern().equals("RANDOM")) {
             int random_index = (int) (Math.random() * m_players.size());
-            return get_m_players(random_index);
+            return get_m_player(random_index);
         }
         return null;
     }
 
-    private Player get_m_players(int index) {
+    private Player get_m_player(int index) {
         int i = 0;
         for (Map.Entry<Player, Location> entry : m_players.entrySet()) {
             if (i == index) {
@@ -97,21 +115,19 @@ public class WorkFunc {
     public void start(long delay,long time) {
         if (!is_running) {
             is_running = true;
-            m_task = new task();
-            m_task.runTaskTimer(m_plugin,20L*delay,20L*time);
+            m_mainTask = new mainTask();
+            m_updateLocationTask = new updateLocationTask();
+            m_mainTask.runTaskTimer(m_plugin,20L*delay,20L*time);
+            m_updateLocationTask.runTaskTimer(m_plugin,20L*delay,m_config_manager.getAFKTime()*20L);
             return;
         }
         m_logger.info("直播机器人已经在运行了。");
     }
 
     public void reFindBot(){
-        m_logger.info("重新寻找直播机器人。");
+        m_logger.info("正在寻找直播机器人。");
         botOffline();
-        m_players.clear();
-        ArrayList<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
-        for (Player player : players) {
-            m_players.put(player, player.getLocation());
-        }
+        updatePlayerList();
         // 获取对应名字的玩家
         Player bot = Bukkit.getPlayer(m_config_manager.getBotName());
         if (bot == null) {
@@ -125,6 +141,15 @@ public class WorkFunc {
         }
     }
 
+    public void updatePlayerList(){
+        m_logger.info("更新玩家列表。");
+        m_players.clear();
+        ArrayList<Player> players = new ArrayList<>(Bukkit.getOnlinePlayers());
+        for (Player player : players) {
+            m_players.put(player, player.getLocation());
+        }
+    }
+
     public void restart() {
         m_logger.info("重启序列。");
         stop();
@@ -135,8 +160,10 @@ public class WorkFunc {
         if (is_running) {
             m_index = 0;
             is_running = false;
-            m_task.cancel();
-            m_task = null;
+            m_mainTask.cancel();
+            m_updateLocationTask.cancel();
+            m_mainTask = null;
+            m_updateLocationTask = null;
             m_logger.warning("序列停止。");
             return;
         }
@@ -152,7 +179,8 @@ public class WorkFunc {
     private final Map<Player, Location> m_players = new HashMap<>();
     private boolean m_is_bot_online = false;
     private int m_index = 0;
-    private task m_task = null;
+    private mainTask m_mainTask = null;
+    private updateLocationTask m_updateLocationTask = null;
     private final LiveBot m_plugin;
     private final ConfigManager m_config_manager;
     private final Logger m_logger;

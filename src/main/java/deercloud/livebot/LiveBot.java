@@ -22,6 +22,7 @@ public final class LiveBot extends JavaPlugin {
         Objects.requireNonNull(Bukkit.getPluginCommand("livebot")).setExecutor(new Commands());
         Objects.requireNonNull(Bukkit.getPluginCommand("livebot")).setTabCompleter(new Commands());
 
+        m_work_func.reFindBot();
         getLogger().info("LiveBot启动完成。");
     }
 

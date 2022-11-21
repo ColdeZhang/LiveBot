@@ -139,8 +139,51 @@ public class Commands implements TabExecutor {
             } else {
                 updateSkipAFK(sender, args);
             }
+        } else if (Objects.equals(args[0], "setAfkTime")) {
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                if (player.isOp()) {
+                    if (Integer.parseInt(args[1]) <= 10) {
+                        player.sendMessage(ChatColor.RED + "时间间隔不能小于10秒。");
+                    } else {
+                        m_config_manager.setAfkTime(Integer.parseInt(args[1]));
+                        player.sendMessage("挂机判断时间" + args[1]);
+                        m_work_func.restart();
+                    }
+                } else {
+                    player.sendMessage(ChatColor.RED + "你没有权限执行此命令。");
+                }
+            } else {
+                m_config_manager.setAfkTime(Integer.parseInt(args[1]));
+                sender.sendMessage("挂机判断时间" + args[1]);
+                m_work_func.restart();
+            }
+        } else if (Objects.equals(args[0], "status")) {
+            if (sender instanceof Player) {
+                Player player = (Player) sender;
+                if (player.isOp()) {
+                    printStatus(sender);
+                } else {
+                    player.sendMessage(ChatColor.RED + "你没有权限执行此命令。");
+                }
+            } else {
+                printStatus(sender);
+            }
         }
         return true;
+    }
+
+    public void printStatus(CommandSender sender) {
+        sender.sendMessage(ChatColor.GREEN + "====================");
+        sender.sendMessage(ChatColor.GREEN + "| LiveBot 状态报告");
+        sender.sendMessage(ChatColor.GREEN + "| 当前被直播玩家：" + ChatColor.YELLOW + m_work_func.getCurrentPlayerName());
+        sender.sendMessage(ChatColor.GREEN + "| 机器人名：" + ChatColor.YELLOW + m_config_manager.getBotName());
+        sender.sendMessage(ChatColor.GREEN + "| 聚焦时间：" + ChatColor.YELLOW + m_config_manager.getFocusTime());
+        sender.sendMessage(ChatColor.GREEN + "| 切换方式：" + ChatColor.YELLOW + m_config_manager.getChangePattern());
+        sender.sendMessage(ChatColor.GREEN + "| 玩家是否可以拒绝：" + ChatColor.YELLOW + m_config_manager.getCanBeMoved());
+        sender.sendMessage(ChatColor.GREEN + "| 是否跳过挂机玩家：" + ChatColor.YELLOW + m_config_manager.getSkipAFK());
+        sender.sendMessage(ChatColor.GREEN + "| 挂机判断时间：" + ChatColor.YELLOW + m_config_manager.getAFKTime());
+        sender.sendMessage(ChatColor.GREEN + "====================");
     }
 
     private void updateSkipAFK(CommandSender sender, String[] args) {
@@ -170,7 +213,7 @@ public class Commands implements TabExecutor {
     @Override
     public List<String> onTabComplete(org.bukkit.command.CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("reload", "setBot", "away", "setTime", "setPattern", "setCanBeMoved", "stop", "start", "skipAFK");
+            return Arrays.asList("reload", "setBot", "away", "setTime", "setPattern", "setCanBeMoved", "stop", "start", "skipAFK", "setAfkTime", "status");
         } else if (args.length == 2) {
             if (Objects.equals(args[0], "setBot")) {
                 ArrayList<Player> playerList = new ArrayList<>(Bukkit.getOnlinePlayers());
@@ -180,7 +223,7 @@ public class Commands implements TabExecutor {
                     playerNames.add(player.getName());
                 }
                 return playerNames;
-            } else if (Objects.equals(args[0], "setTime")) {
+            } else if (Objects.equals(args[0], "setTime") || Objects.equals(args[0], "setAfkTime")) {
                 return Collections.singletonList("请输入时间(单位秒)");
             } else if (Objects.equals(args[0], "setPattern")) {
                 return Arrays.asList("ORDER", "RANDOM");

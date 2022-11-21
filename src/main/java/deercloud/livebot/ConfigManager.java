@@ -33,6 +33,7 @@ public class ConfigManager {
         m_can_be_moved = m_config_file.getBoolean("Setting.CanBeMoved", true);
         m_is_nagging = m_config_file.getBoolean("Setting.IsNagging", true);
         m_skip_afk = m_config_file.getBoolean("Setting.SkipAFK", true);
+        m_afk_time = m_config_file.getInt("Setting.AFKTime", 60);
         m_logger.info("配置文件当前内容");
         m_logger.info("   -  直播机器人名称   ：" + m_bot_name);
         m_logger.info("   -  切换频率        ：" + m_focus_time + "秒");
@@ -50,6 +51,7 @@ public class ConfigManager {
     private boolean m_can_be_moved;
     private boolean m_is_nagging;
     private boolean m_skip_afk;
+    private int m_afk_time;
 
 
 
@@ -110,6 +112,16 @@ public class ConfigManager {
     public void setSkipAFK(boolean skip_afk) {
         m_skip_afk = skip_afk;
         m_config_file.set("Setting.SkipAFK", skip_afk);
+        m_plugin.saveConfig();
+    }
+
+    public int getAFKTime() {
+        return m_afk_time;
+    }
+
+    public void setAfkTime (int time) {
+        m_afk_time = time;
+        m_config_file.set("Setting.AFKTime", time);
         m_plugin.saveConfig();
     }
 

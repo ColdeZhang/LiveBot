@@ -49,6 +49,10 @@
     
 `/livebot stop` 停止自动跟随。
 
+`/livebot setAFKTime <second>` 设置挂机判断时间。
+
+`/livebot status` 查看当前状态。
+
 ### 玩家指令
 
 `/livebot away` 让自己不被跟随。
@@ -70,4 +74,8 @@ Setting:
   CanBeMoved: true
   # 是否在聊天栏公告自己的状态 (未实装)
   IsNagging: true
+  # 是否跳过挂机玩家
+  SkipAFK: true
+  # 挂机判断时间（单位：秒）
+  AFKTime: 60
 ```

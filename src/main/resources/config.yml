@@ -12,3 +12,5 @@ Setting:
   IsNagging: true
   # 是否跳过挂机玩家
   SkipAFK: true
+  # 挂机判断时间（单位：秒）
+  AFKTime: 60
