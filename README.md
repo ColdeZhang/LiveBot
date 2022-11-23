@@ -43,7 +43,7 @@
     
 `/livebot setPattern <ORDER | RANDOM>` 切换方式（顺序 ｜ 随机）。
 
-`/livebot setCanMoved <true | false>` 玩家是否可以不被跟随。
+`/livebot setCanBeMoved <true | false>` 玩家是否可以不被跟随。
 
 `/livebot setSkipAFK <true | false>` 是否跳过挂机玩家。
 
