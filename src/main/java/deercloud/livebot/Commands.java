@@ -172,7 +172,7 @@ public class Commands implements TabExecutor {
     @Override
     public List<String> onTabComplete(org.bukkit.command.CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("reload", "setBot", "away", "setTime", "setPattern", "setCanBeMoved", "stop", "start", "skipAFK", "setAfkTime", "status");
+            return Arrays.asList("reload", "setBot", "away", "setTime", "setCanBeMoved", "stop", "start", "skipAFK", "status");
         } else if (args.length == 2) {
             if (Objects.equals(args[0], "setBot")) {
                 ArrayList<Player> playerList = new ArrayList<>(Bukkit.getOnlinePlayers());
@@ -182,11 +182,9 @@ public class Commands implements TabExecutor {
                 }
                 playerNames.remove(m_config_manager.getBotName());
                 return playerNames;
-            } else if (Objects.equals(args[0], "setTime") || Objects.equals(args[0], "setAfkTime")) {
+            } else if (Objects.equals(args[0], "setTime")) {
                 return Collections.singletonList("请输入时间(单位秒)");
-            } else if (Objects.equals(args[0], "setPattern")) {
-                return Arrays.asList("ORDER", "RANDOM");
-            } else if (Objects.equals(args[0], "setCanBeMoved") || Objects.equals(args[0], "skipAFK")) {
+            }  else if (Objects.equals(args[0], "setCanBeMoved") || Objects.equals(args[0], "skipAFK")) {
                 return Arrays.asList("true", "false");
             } else {
                 return Collections.emptyList();
