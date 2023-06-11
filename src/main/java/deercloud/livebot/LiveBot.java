@@ -54,14 +54,20 @@ public final class LiveBot extends JavaPlugin {
     private BotMainThread m_main_thread;
 
     public void restartBot() {
-        if (!m_main_thread.isCancelled()) {
-            m_main_thread.cancel();
+        try {
+            if (!m_main_thread.isCancelled()) {
+                m_main_thread.cancel();
+            }
+        } catch (Exception ignored) {
         }
         m_main_thread.runTaskTimer(this, 0, m_config_manager.getFocusTime() * 20L);
     }
 
     public void stopBot() {
-        m_main_thread.cancel();
+        try {
+            m_main_thread.cancel();
+        } catch (Exception ignored) {
+        }
     }
 
 
