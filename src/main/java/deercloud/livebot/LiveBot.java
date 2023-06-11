@@ -1,10 +1,7 @@
 package deercloud.livebot;
 
-import deercloud.livebot.Commands;
-
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import deercloud.livebot.events.*;
 
 import java.util.Objects;
 
@@ -16,20 +13,22 @@ public final class LiveBot extends JavaPlugin {
         m_instance = this;
         // Plugin startup logic
         m_config_manager = new ConfigManager(this);
-        m_work_func = new WorkFunc(this);
 
-        Bukkit.getPluginManager().registerEvents(new playerEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new Events(), this);
         Objects.requireNonNull(Bukkit.getPluginCommand("livebot")).setExecutor(new Commands());
         Objects.requireNonNull(Bukkit.getPluginCommand("livebot")).setTabCompleter(new Commands());
 
-        m_work_func.reFindBot();
+        m_cache = new PlayerCache(m_instance.getServer().getOnlinePlayers());
+        m_main_thread = new BotMainThread();
+        restartBot();
+
         getLogger().info("LiveBot启动完成。");
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-        m_work_func.stop();
+        stopBot();
         getLogger().info("LiveBot已经关闭。");
     }
 
@@ -38,8 +37,8 @@ public final class LiveBot extends JavaPlugin {
         return m_config_manager;
     }
 
-    public WorkFunc getWorkFunc() {
-        return m_work_func;
+    public PlayerCache getCache() {
+        return m_cache;
     }
 
     public static LiveBot getInstance() {
@@ -50,6 +49,20 @@ public final class LiveBot extends JavaPlugin {
 
     private ConfigManager m_config_manager;
 
-    private WorkFunc m_work_func;
+    private PlayerCache m_cache;
+
+    private BotMainThread m_main_thread;
+
+    public void restartBot() {
+        if (!m_main_thread.isCancelled()) {
+            m_main_thread.cancel();
+        }
+        m_main_thread.runTaskTimer(this, 0, m_config_manager.getFocusTime() * 20L);
+    }
+
+    public void stopBot() {
+        m_main_thread.cancel();
+    }
+
 
 }
