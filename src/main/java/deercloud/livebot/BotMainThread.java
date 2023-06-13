@@ -26,8 +26,9 @@ public class BotMainThread extends BukkitRunnable {
         if (target == null) {
             return;
         }
-        bot.setGameMode(GameMode.SPECTATOR);
+        bot.setGameMode(GameMode.CREATIVE);
         bot.teleport(target.getLocation());
+        bot.setGameMode(GameMode.SPECTATOR);
         bot.setSpectatorTarget(target);
     }
 }

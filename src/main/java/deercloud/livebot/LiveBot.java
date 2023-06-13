@@ -2,6 +2,7 @@ package deercloud.livebot;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Objects;
 
@@ -55,18 +56,20 @@ public final class LiveBot extends JavaPlugin {
 
     public void restartBot() {
         try {
-            if (!m_main_thread.isCancelled()) {
-                m_main_thread.cancel();
-            }
-        } catch (Exception ignored) {
+            m_main_thread.runTaskTimer(this, 0, m_config_manager.getFocusTime() * 20L);
+        } catch (java.lang.IllegalStateException e) {
+            m_main_thread.cancel();
+            m_main_thread = new BotMainThread();
+            m_main_thread.runTaskTimer(this, 0, m_config_manager.getFocusTime() * 20L);
         }
-        m_main_thread.runTaskTimer(this, 0, m_config_manager.getFocusTime() * 20L);
     }
 
     public void stopBot() {
         try {
             m_main_thread.cancel();
-        } catch (Exception ignored) {
+            m_main_thread = new BotMainThread();
+        } catch (java.lang.IllegalStateException e) {
+            // do nothing
         }
     }
 
