@@ -26,6 +26,7 @@ public class BotMainThread extends BukkitRunnable {
         if (target == null) {
             return;
         }
+        LiveBot.getInstance().getLogger().info("正在跟随玩家 : " + target.getName());
         bot.setGameMode(GameMode.CREATIVE);
         bot.teleport(target.getLocation());
         bot.setGameMode(GameMode.SPECTATOR);

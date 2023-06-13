@@ -16,14 +16,14 @@ public class Commands implements TabExecutor {
             if (sender instanceof Player) {
                 Player player = (Player) sender;
                 if (player.isOp()) {
-                    m_config_manager.reload();
+                    LiveBot.getInstance().getConfigManager().reload();
                     player.sendMessage("配置文件已重新加载。");
                     LiveBot.getInstance().restartBot();
                 } else {
                     player.sendMessage(ChatColor.RED + "你没有权限执行此命令。");
                 }
             } else {
-                m_config_manager.reload();
+                LiveBot.getInstance().getConfigManager().reload();
                 sender.sendMessage("配置文件已重新加载。");
                 LiveBot.getInstance().restartBot();
             }
@@ -31,22 +31,22 @@ public class Commands implements TabExecutor {
             if (sender instanceof Player) {
                 Player player = (Player) sender;
                 if (player.isOp()) {
-                    m_config_manager.setBotName(args[1]);
+                    LiveBot.getInstance().getConfigManager().setBotName(args[1]);
                     player.sendMessage("机器人已设置为" + args[1]);
                     LiveBot.getInstance().restartBot();
                 } else {
                     player.sendMessage(ChatColor.RED + "你没有权限执行此命令。");
                 }
             } else {
-                m_config_manager.setBotName(args[1]);
+                LiveBot.getInstance().getConfigManager().setBotName(args[1]);
                 sender.sendMessage("机器人已设置为" + args[1]);
                 LiveBot.getInstance().restartBot();
             }
         } else if (Objects.equals(args[0], "away")) {
             if (sender instanceof org.bukkit.entity.Player) {
                 org.bukkit.entity.Player player = (org.bukkit.entity.Player) sender;
-                if (m_config_manager.getCanBeMoved()) {
-                    m_player_cache.getPlayer(player).dontFollow();
+                if (LiveBot.getInstance().getConfigManager().getCanBeMoved()) {
+                    LiveBot.getInstance().getCache().getPlayer(player).dontFollow();
                     player.sendMessage(ChatColor.GREEN + "机器人已经离开了你，本次登录不会再被选中。");
                 } else {
                     player.sendMessage(ChatColor.YELLOW + "服主设置了强制跟随，你无法摆脱机器人，请联系服主。");
@@ -61,7 +61,7 @@ public class Commands implements TabExecutor {
                     if (Integer.parseInt(args[1]) <= 10) {
                         player.sendMessage(ChatColor.RED + "时间间隔不能小于10秒。");
                     } else {
-                        m_config_manager.setFocusTime(Integer.parseInt(args[1]));
+                        LiveBot.getInstance().getConfigManager().setFocusTime(Integer.parseInt(args[1]));
                         player.sendMessage("聚焦时间已设置为" + args[1]);
                         LiveBot.getInstance().restartBot();
                     }
@@ -69,7 +69,7 @@ public class Commands implements TabExecutor {
                     player.sendMessage(ChatColor.RED + "你没有权限执行此命令。");
                 }
             } else {
-                m_config_manager.setFocusTime(Integer.parseInt(args[1]));
+                LiveBot.getInstance().getConfigManager().setFocusTime(Integer.parseInt(args[1]));
                 sender.sendMessage("聚焦时间已设置为" + args[1]);
                 LiveBot.getInstance().restartBot();
             }
@@ -137,20 +137,20 @@ public class Commands implements TabExecutor {
     public void printStatus(CommandSender sender) {
         sender.sendMessage(ChatColor.GREEN + "====================");
         sender.sendMessage(ChatColor.GREEN + "| LiveBot 状态报告");
-        sender.sendMessage(ChatColor.GREEN + "| 当前被直播玩家：" + ChatColor.YELLOW + m_player_cache.getCurrentFollowingPlayerName());
-        sender.sendMessage(ChatColor.GREEN + "| 机器人名：" + ChatColor.YELLOW + m_config_manager.getBotName());
-        sender.sendMessage(ChatColor.GREEN + "| 聚焦时间：" + ChatColor.YELLOW + m_config_manager.getFocusTime());
-        sender.sendMessage(ChatColor.GREEN + "| 玩家是否可以拒绝：" + ChatColor.YELLOW + m_config_manager.getCanBeMoved());
-        sender.sendMessage(ChatColor.GREEN + "| 是否跳过挂机玩家：" + ChatColor.YELLOW + m_config_manager.getSkipAFK());
+        sender.sendMessage(ChatColor.GREEN + "| 当前被直播玩家：" + ChatColor.YELLOW + LiveBot.getInstance().getCache().getCurrentFollowingPlayerName());
+        sender.sendMessage(ChatColor.GREEN + "| 机器人名：" + ChatColor.YELLOW + LiveBot.getInstance().getConfigManager().getBotName());
+        sender.sendMessage(ChatColor.GREEN + "| 聚焦时间：" + ChatColor.YELLOW + LiveBot.getInstance().getConfigManager().getFocusTime());
+        sender.sendMessage(ChatColor.GREEN + "| 玩家是否可以拒绝：" + ChatColor.YELLOW + LiveBot.getInstance().getConfigManager().getCanBeMoved());
+        sender.sendMessage(ChatColor.GREEN + "| 是否跳过挂机玩家：" + ChatColor.YELLOW + LiveBot.getInstance().getConfigManager().getSkipAFK());
         sender.sendMessage(ChatColor.GREEN + "====================");
     }
 
     private void updateSkipAFK(CommandSender sender, String[] args) {
         if (Objects.equals(args[1], "true")) {
-            m_config_manager.setSkipAFK(true);
+            LiveBot.getInstance().getConfigManager().setSkipAFK(true);
             sender.sendMessage(ChatColor.GREEN + "允许玩家不被跟随。");
         } else if (Objects.equals(args[1], "false")) {
-            m_config_manager.setSkipAFK(false);
+            LiveBot.getInstance().getConfigManager().setSkipAFK(false);
             sender.sendMessage(ChatColor.GREEN + "玩家现在无法摆脱机器人。");
         } else {
             sender.sendMessage(ChatColor.RED + "参数只能为true或false。");
@@ -159,10 +159,10 @@ public class Commands implements TabExecutor {
 
     private void updateCanBeMoved(CommandSender sender, String[] args) {
         if (Objects.equals(args[1], "true")) {
-            m_config_manager.setCanBeMoved(true);
+            LiveBot.getInstance().getConfigManager().setCanBeMoved(true);
             sender.sendMessage(ChatColor.GREEN + "允许玩家不被跟随。");
         } else if (Objects.equals(args[1], "false")) {
-            m_config_manager.setCanBeMoved(false);
+            LiveBot.getInstance().getConfigManager().setCanBeMoved(false);
             sender.sendMessage(ChatColor.GREEN + "玩家现在无法摆脱机器人。");
         } else {
             sender.sendMessage(ChatColor.RED + "参数只能为true或false。");
@@ -180,7 +180,7 @@ public class Commands implements TabExecutor {
                 for (Player player : playerList) {
                     playerNames.add(player.getName());
                 }
-                playerNames.remove(m_config_manager.getBotName());
+                playerNames.remove(LiveBot.getInstance().getConfigManager().getBotName());
                 return playerNames;
             } else if (Objects.equals(args[0], "setTime")) {
                 return Collections.singletonList("请输入时间(单位秒)");
@@ -193,9 +193,4 @@ public class Commands implements TabExecutor {
             return Collections.emptyList();
         }
     }
-
-
-
-    protected ConfigManager m_config_manager = LiveBot.getInstance().getConfigManager();
-    protected PlayerCache m_player_cache = LiveBot.getInstance().getCache();
 }

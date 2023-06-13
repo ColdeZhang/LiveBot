@@ -14,7 +14,7 @@ public class PlayerCache {
             if (player instanceof Player) {
                 Player p = (Player) player;
                 if (!p.getName().equals(LiveBot.getInstance().getConfigManager().getBotName())) {
-                    m_players.add(new XPlayer((Player) p));
+                    m_players.add(new XPlayer(p));
                 }
             }
         }
@@ -53,10 +53,12 @@ public class PlayerCache {
         boolean found = false;
         for (XPlayer key : m_players) {
             if (key.isDontFollow() || !key.getPlayer().isOnline()) {
+                LiveBot.getInstance().getLogger().info("跳过不想被跟随玩家 : " + key.getName());
                 continue;
             }
             // 跳过挂机的玩家
             if (key.isAFK() && LiveBot.getInstance().getConfigManager().getSkipAFK()) {
+                LiveBot.getInstance().getLogger().info("跳过挂机玩家 : " + key.getName());
                 continue;
             }
             if (found) {
